@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "1.7.5"
-    TF_WORKING_DIR: "jenkins-server"
+    TF_WORKING_DIR: "awscicd/jenkins-server"
     # ENV will be passed from CodeBuild/CodePipeline environment variable
     # Values: dev | nonprod | prod
 
