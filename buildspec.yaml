@@ -20,7 +20,7 @@ phases:
       - cd awscicd/jenkins-server
       - echo "Terraform Init"
       - pwd
-      - terraform init -reconfigure -backend-config=/backend/dev.hcl
+      - terraform init -reconfigure -backend-config=backend/dev.hcl
 
   build:
     commands:
