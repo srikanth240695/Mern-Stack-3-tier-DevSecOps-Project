@@ -21,4 +21,4 @@ phases:
   build:
     commands:
 
-      - - terraform apply -var-file=env/jenkins-dev.tfvars -out=tfplan
+      - terraform apply -var-file=env/jenkins-dev.tfvars -out=tfplan
