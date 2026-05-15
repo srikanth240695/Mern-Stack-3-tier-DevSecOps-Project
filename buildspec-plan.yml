@@ -28,10 +28,10 @@ phases:
     commands:
       - terraform validate
       - echo "Terraform Plan ENV=${ENV}"
-      - terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
+      - terraform plan -destroy -var-file="env/jenkins-${ENV}.tfvars" -out=destroyplan-${ENV}
       - pwd
       - ls -lrt
-      - find . -name "tfplan*"
+      - find . -name "destroyplan*"
 
   post_build:
     commands:
@@ -40,6 +40,6 @@ phases:
 artifacts:
   base-directory: awscicd/jenkins-server
   files:
-    - tfplan-${ENV}
+    - destroyplan-${ENV}
     - "**/*"
   discard-paths: no
