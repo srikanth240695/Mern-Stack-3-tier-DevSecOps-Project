@@ -16,9 +16,9 @@ phases:
 
       - cd awscicd/jenkins-server
 
-      - terraform init -reconfigure -backend-config=backend/${ENVIRONMENT}.hcl
+      - terraform init -reconfigure -backend-config=backend/dev.hcl
 
   build:
     commands:
 
-      - terraform apply -auto-approve tfplan
+      - - terraform apply -var-file=env/jenkins-dev.tfvars -out=tfplan
