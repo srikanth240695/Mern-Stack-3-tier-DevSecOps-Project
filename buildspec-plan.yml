@@ -22,9 +22,7 @@ phases:
       - echo "== Initializing Terraform for ENV=$ENV =="
       - cd $TF_WORKING_DIR
       - |
-        terraform init \
-          -backend-config="backend/${ENV}.hcl" \
-          -reconfigure
+        terraform init -backend-config="backend/${ENV}.hcl" -reconfigure
 
   build:
     commands:
@@ -32,10 +30,7 @@ phases:
       - terraform validate
       - echo "== Running Terraform Plan for ENV=$ENV =="
       - |
-        terraform plan \
-          -var-file="env/jenkins-${ENV}.tfvars" \
-          -out=tfplan-${ENV} \
-          -input=false
+        terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
       - echo "Plan complete"
 
   post_build:
