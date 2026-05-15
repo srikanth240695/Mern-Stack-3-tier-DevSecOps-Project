@@ -1,27 +1,41 @@
 version: 0.2
 
+env:
+  variables:
+    TF_VERSION: "1.7.5"
+    TF_WORKING_DIR: "jenkins-server"
+    # ENV will be passed from CodeBuild/CodePipeline environment variable
+    # Values: dev | nonprod | prod
+
 phases:
-
   install:
+    runtime-versions:
+      python: 3.11
     commands:
-
-      - wget https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip
-
-      - unzip terraform_1.8.5_linux_amd64.zip
-
-      - mv terraform /usr/local/bin/
+      - echo "Installing Terraform $TF_VERSION"
+      - wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip -q terraform_${TF_VERSION}_linux_amd64.zip -d /usr/local/bin/
+      - terraform --version
 
   pre_build:
     commands:
-
-      - cd awscicd/jenkins-server
-
-      - terraform init -reconfigure -backend-config=backend/dev.hcl
-      - pwd
-      - ls -lrt
-      - find . -name tfplan
+      - echo "== Re-initializing Terraform for ENV=$ENV =="
+      - cd $TF_WORKING_DIR
+      - |
+        terraform init \
+          -backend-config="backend/${ENV}.hcl" \
+          -reconfigure
 
   build:
     commands:
+      - echo "== Applying Terraform Plan for ENV=$ENV =="
+      - |
+        terraform apply \
+          -auto-approve \
+          -input=false \
+          tfplan-${ENV}
 
-      - terraform apply tfplan
+  post_build:
+    commands:
+      - echo "== Apply complete for ENV=$ENV =="
+      - terraform output
