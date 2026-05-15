@@ -19,6 +19,7 @@ phases:
   pre_build:
     commands:
       - echo "ENV=$ENV | TF_DIR=$TF_DIR"
+      - cd $TF_DIR
       - echo "Current dir $(pwd)"
       - ls -la backend/
       - terraform init -backend-config="backend/${ENV}.hcl" -reconfigure -input=false
