@@ -17,31 +17,16 @@ phases:
 
   pre_build:
     commands:
-      - |
-        if [ -z "$ENV" ]; then
-          echo "ERROR: ENV variable not set."
-          exit 1
-        fi
       - echo "ENV=$ENV | TF_DIR=$TF_DIR"
       - cd $TF_DIR
-      - |
-        terraform init \
-          -backend-config="backend/${ENV}.hcl" \
-          -reconfigure \
-          -input=false
+      - terraform init -backend-config="backend/${ENV}.hcl" -reconfigure -input=false
 
   build:
     commands:
-      - cd $TF_DIR             # ← cd again for this phase
-      - echo "== Terraform Apply | ENV=${ENV} =="
-      - |
-        terraform apply \
-          -auto-approve \
-          -input=false \
-          tfplan-${ENV}
+      - echo "Terraform Apply ENV=${ENV}"
+      - terraform apply -auto-approve -input=false tfplan-${ENV}
 
   post_build:
     commands:
-      - cd $TF_DIR
-      - echo "== Apply complete for ENV=${ENV} =="
+      - echo "Apply complete for ENV=${ENV}"
       - terraform output
