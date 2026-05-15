@@ -29,7 +29,7 @@ phases:
   build:
     commands:
       - echo "Terraform Apply ENV=${ENV}"
-      - terraform apply -auto-approve -input=false /codebuild/output/src471/src/s3/01/tfplan-dev
+      - terraform apply -auto-approve /codebuild/output/src471/src/s3/01/tfplan-dev
 
   post_build:
     commands:
