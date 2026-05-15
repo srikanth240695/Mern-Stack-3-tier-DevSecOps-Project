@@ -20,6 +20,9 @@ phases:
       - echo "ENV=$ENV | TF_DIR=$TF_DIR"
       - cd $TF_DIR
       - terraform init -backend-config="backend/${ENV}.hcl" -reconfigure -input=false
+      - pwd
+      - ls -lrt
+      - find . -name "tfplan*"
 
   build:
     commands:
