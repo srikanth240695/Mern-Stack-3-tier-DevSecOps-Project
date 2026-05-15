@@ -29,6 +29,9 @@ phases:
       - terraform validate
       - echo "Terraform Plan ENV=${ENV}"
       - terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
+      - pwd
+      - ls -lrt
+      - find . -name "tfplan*"
 
   post_build:
     commands:
