@@ -24,4 +24,4 @@ phases:
   build:
     commands:
 
-      - terraform apply awscicd/jenkins-server/tfplan
+      - terraform apply tfplan
