@@ -3,42 +3,54 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "1.7.5"
-    TF_WORKING_DIR: "awscicd/jenkins-server"
-    # ENV will be passed from CodeBuild/CodePipeline environment variable
-    # Values: dev | nonprod | prod
+    ENV: "dev"                # Override in CodeBuild console: dev | nonprod | prod
+    TF_DIR: "awscicd/jenkins-server"
 
 phases:
   install:
     runtime-versions:
       python: 3.11
     commands:
-      - echo "Installing Terraform $TF_VERSION"
+      - echo "Installing Terraform ${TF_VERSION}"
       - wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
       - unzip -q terraform_${TF_VERSION}_linux_amd64.zip -d /usr/local/bin/
       - terraform --version
 
   pre_build:
     commands:
-      - echo "== Initializing Terraform for ENV=$ENV =="
-      - cd $TF_WORKING_DIR
       - |
-        terraform init -backend-config="backend/${ENV}.hcl" -reconfigure
+        if [ -z "$ENV" ]; then
+          echo "ERROR: ENV variable not set. Use dev | nonprod | prod"
+          exit 1
+        fi
+      - echo "ENV=$ENV | TF_DIR=$TF_DIR"
+      - cd $TF_DIR
+      - echo "Current dir: $(pwd)"
+      - echo "Listing backend configs:"
+      - ls -la backend/
+      - |
+        terraform init \
+          -backend-config="backend/${ENV}.hcl" \
+          -reconfigure \
+          -input=false
 
   build:
     commands:
-      - echo "== Running Terraform Validate =="
+      - cd $TF_DIR             # ← Must cd again; each phase resets to repo root
       - terraform validate
-      - echo "== Running Terraform Plan for ENV=$ENV =="
+      - echo "== Terraform Plan | ENV=${ENV} =="
       - |
-        terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
-      - echo "Plan complete"
+        terraform plan \
+          -var-file="env/jenkins-${ENV}.tfvars" \
+          -out=tfplan-${ENV} \
+          -input=false
 
   post_build:
     commands:
-      - echo "== Plan phase finished for ENV=$ENV =="
+      - echo "== Plan complete for ENV=${ENV} =="
 
 artifacts:
-  base-directory: $TF_WORKING_DIR
+  base-directory: awscicd/jenkins-server
   files:
     - tfplan-${ENV}
     - "**/*"
