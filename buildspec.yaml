@@ -16,8 +16,10 @@ phases:
   pre_build:
     commands:
       - echo "Changing Directory"
+      - pwd
       - cd awscicd/jenkins-server
       - echo "Terraform Init"
+      - pwd
       - terraform init -reconfigure -backend-config=awscicd/jenkins-server/backend/dev.hcl
 
   build:
