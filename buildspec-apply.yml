@@ -3,32 +3,37 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "1.7.5"
-    TF_WORKING_DIR: "jenkins-server"
-    # ENV will be passed from CodeBuild/CodePipeline environment variable
-    # Values: dev | nonprod | prod
+    ENV: "dev"
+    TF_DIR: "awscicd/jenkins-server"
 
 phases:
   install:
     runtime-versions:
       python: 3.11
     commands:
-      - echo "Installing Terraform $TF_VERSION"
       - wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
       - unzip -q terraform_${TF_VERSION}_linux_amd64.zip -d /usr/local/bin/
       - terraform --version
 
   pre_build:
     commands:
-      - echo "== Re-initializing Terraform for ENV=$ENV =="
-      - cd $TF_WORKING_DIR
+      - |
+        if [ -z "$ENV" ]; then
+          echo "ERROR: ENV variable not set."
+          exit 1
+        fi
+      - echo "ENV=$ENV | TF_DIR=$TF_DIR"
+      - cd $TF_DIR
       - |
         terraform init \
           -backend-config="backend/${ENV}.hcl" \
-          -reconfigure
+          -reconfigure \
+          -input=false
 
   build:
     commands:
-      - echo "== Applying Terraform Plan for ENV=$ENV =="
+      - cd $TF_DIR             # ← cd again for this phase
+      - echo "== Terraform Apply | ENV=${ENV} =="
       - |
         terraform apply \
           -auto-approve \
@@ -37,5 +42,6 @@ phases:
 
   post_build:
     commands:
-      - echo "== Apply complete for ENV=$ENV =="
+      - cd $TF_DIR
+      - echo "== Apply complete for ENV=${ENV} =="
       - terraform output
