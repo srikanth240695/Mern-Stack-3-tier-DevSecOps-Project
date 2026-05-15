@@ -34,4 +34,4 @@ phases:
   post_build:
     commands:
       - echo "Terraform Apply"
-      - terraform apply -auto-approve -var-file=env/jenkins-dev.tfvars
+      - terraform destroy -auto-approve -var-file=env/jenkins-dev.tfvars
