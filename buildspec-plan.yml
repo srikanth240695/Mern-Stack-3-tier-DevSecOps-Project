@@ -19,14 +19,12 @@ phases:
   pre_build:
     commands:
       - echo "ENV=$ENV | TF_DIR=$TF_DIR"
-      - cd $TF_DIR
       - echo "Current dir $(pwd)"
       - ls -la backend/
       - terraform init -backend-config="backend/${ENV}.hcl" -reconfigure -input=false
 
   build:
     commands:
-      - cd $TF_DIR
       - terraform validate
       - echo "Terraform Plan ENV=${ENV}"
       - terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
