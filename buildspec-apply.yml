@@ -23,6 +23,8 @@ phases:
       - pwd
       - ls -lrt
       - find . -name "tfplan*"
+      - ls -lrt /codebuild/output/src*/src/s3/01
+      - find /codebuild/output/src*/src/s3/01 -name "tfplan*"
 
   build:
     commands:
