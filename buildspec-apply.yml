@@ -30,6 +30,7 @@ phases:
     commands:
       - echo "Terraform Apply ENV=${ENV}"
       - terraform destroy -auto-approve $(find /codebuild/output -name tfplan-${ENV})
+      - ls -ltr
 
   post_build:
     commands:
