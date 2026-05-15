@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "1.7.5"
-    ENV: "dev"                # Override in CodeBuild console: dev | nonprod | prod
+    ENV: "dev"
     TF_DIR: "awscicd/jenkins-server"
 
 phases:
@@ -18,36 +18,22 @@ phases:
 
   pre_build:
     commands:
-      - |
-        if [ -z "$ENV" ]; then
-          echo "ERROR: ENV variable not set. Use dev | nonprod | prod"
-          exit 1
-        fi
       - echo "ENV=$ENV | TF_DIR=$TF_DIR"
       - cd $TF_DIR
-      - echo "Current dir: $(pwd)"
-      - echo "Listing backend configs:"
+      - echo "Current dir $(pwd)"
       - ls -la backend/
-      - |
-        terraform init \
-          -backend-config="backend/${ENV}.hcl" \
-          -reconfigure \
-          -input=false
+      - terraform init -backend-config="backend/${ENV}.hcl" -reconfigure -input=false
 
   build:
     commands:
-      - cd $TF_DIR             # ← Must cd again; each phase resets to repo root
+      - cd $TF_DIR
       - terraform validate
-      - echo "== Terraform Plan | ENV=${ENV} =="
-      - |
-        terraform plan \
-          -var-file="env/jenkins-${ENV}.tfvars" \
-          -out=tfplan-${ENV} \
-          -input=false
+      - echo "Terraform Plan ENV=${ENV}"
+      - terraform plan -var-file="env/jenkins-${ENV}.tfvars" -out=tfplan-${ENV} -input=false
 
   post_build:
     commands:
-      - echo "== Plan complete for ENV=${ENV} =="
+      - echo "Plan complete for ENV=${ENV}"
 
 artifacts:
   base-directory: awscicd/jenkins-server
