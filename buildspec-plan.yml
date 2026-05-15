@@ -22,9 +22,7 @@ phases:
   build:
     commands:
 
-      - terraform plan \
-        -var-file=env/jenkins-${ENVIRONMENT}.tfvars \
-        -out=tfplan
+      - terraform plan -var-file=env/jenkins-${ENVIRONMENT}.tfvars -out=tfplan
 
 artifacts:
   files:
