@@ -26,3 +26,8 @@ phases:
 artifacts:
   files:
     - awscicd/jenkins-server/tfplan
+
+  post-build:
+    commands:
+      - pwd
+      - ls -lrt
