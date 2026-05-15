@@ -20,7 +20,7 @@ phases:
       - cd awscicd/jenkins-server
       - echo "Terraform Init"
       - pwd
-      - terraform init -reconfigure -backend-config=awscicd/jenkins-server/backend/dev.hcl
+      - terraform init -reconfigure -backend-config=/backend/dev.hcl
 
   build:
     commands:
@@ -29,9 +29,9 @@ phases:
       - echo "Terraform Validate"
       - terraform validate
       - echo "Terraform Plan"
-      - terraform plan -var-file=awscicd/jenkins-server/env/jenkins-dev.tfvars
+      - terraform plan -var-file=env/jenkins-dev.tfvars
 
   post_build:
     commands:
       - echo "Terraform Apply"
-      - terraform apply -auto-approve -var-file=awscicd/jenkins-server/env/jenkins-dev.tfvars
+      - terraform apply -auto-approve -var-file=env/jenkins-dev.tfvars
