@@ -21,4 +21,4 @@ phases:
   build:
     commands:
 
-      - terraform apply -var-file=env/jenkins-dev.tfvars awscicd/jenkins-server/tfplan
+      - terraform apply awscicd/jenkins-server/tfplan
