@@ -1,0 +1,123 @@
+properties([
+    parameters([
+        choice(
+            name: 'Environment',
+            choices: ['dev', 'nonprod', 'prod'],
+            description: 'Select Environment'
+        ),
+
+        choice(
+            name: 'Terraform_Action',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Select Terraform Action'
+        )
+    ])
+])
+
+pipeline {
+    agent any
+    environment {
+        AWS_REGION = 'us-west-2'
+    }
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                url: 'https://github.com/srikanth240695/End-to-End-Kubernetes-Three-Tier-DevSecOps-Project.git'
+            }
+        }
+
+        stage('Debug Workspace') {
+                steps {
+                sh '''
+                pwd
+                ls -ltr
+                find . -name "*.tf"
+                '''
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                dir('eks-cluster') {
+                    withAWS(credentials: 'aws-creds', region: 'us-west-2') {
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Format Check') {
+            steps {
+                dir('eks-cluster') {
+                    withAWS(credentials: 'aws-creds', region: 'us-west-2') {
+                        sh 'terraform fmt -check'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                dir('eks-cluster') {
+                    withAWS(credentials: 'aws-creds', region: 'us-west-2') {
+                        sh 'terraform validate'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Action') {
+            steps {
+                dir('eks-cluster') {
+                    withAWS(credentials: 'aws-creds', region: 'us-west-2') {
+
+                        script {
+
+                            if (params.Terraform_Action == 'plan') {
+
+                                sh """
+                                terraform plan \
+                                -var-file=${params.Environment}.tfvars
+                                """
+
+                            } else if (params.Terraform_Action == 'apply') {
+
+                                sh """
+                                terraform apply \
+                                -var-file=${params.Environment}.tfvars \
+                                -auto-approve
+                                """
+
+                            } else if (params.Terraform_Action == 'destroy') {
+
+                                sh """
+                                terraform destroy \
+                                -var-file=${params.Environment}.tfvars \
+                                -auto-approve
+                                """
+
+                            } else {
+
+                                error "Invalid Terraform Action"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    post {
+
+        success {
+            echo 'Terraform pipeline executed successfully!'
+        }
+
+        failure {
+            echo 'Terraform pipeline failed!'
+        }
+    }
+}
