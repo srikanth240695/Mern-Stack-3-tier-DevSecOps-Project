@@ -1,0 +1,81 @@
+# terraform-jenkins-deploy.yml
+
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - develop
+      - nonprod
+      - main
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - nonprod
+          - prod
+      action:
+        description: "Terraform Action"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  terraform-dev:
+    if: |
+      github.ref_name == 'develop' ||
+      github.event.inputs.environment == 'dev'
+
+    uses: ./.github/workflows/terraform-jenkins-reusable.yml
+
+    with:
+      environment: dev
+      tfvars_file: env/jenkins-dev.tfvars
+      backend_config: backend/dev.hcl
+      terraform_action: destroy 
+
+    secrets: inherit
+
+
+  terraform-nonprod:
+    if: |
+      github.ref_name == 'nonprod' ||
+      github.event.inputs.environment == 'nonprod'
+
+    uses: ./.github/workflows/terraform-jenkins-reusable.yml
+
+    with:
+      environment: nonprod
+      tfvars_file: env/jenkins-nonprod.tfvars
+      backend_config: backend/nonprod.hcl
+      terraform_action: apply
+
+    secrets: inherit
+
+
+  terraform-prod:
+    if: |
+      github.ref_name == 'main' ||
+      github.event.inputs.environment == 'prod'
+
+    uses: ./.github/workflows/terraform-jenkins-reusable.yml
+
+    with:
+      environment: prod
+      tfvars_file: env/jenkins-prod.tfvars
+      backend_config: backend/prod.hcl
+      terraform_action: apply
+
+    secrets: inherit
