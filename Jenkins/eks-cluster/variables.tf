@@ -37,7 +37,7 @@ variable "endpoint_private_access" {
 variable "endpoint_public_access" {
   description = "Whether the EKS cluster endpoint is accessible publicly"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "addons" {
